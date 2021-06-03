@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("orm_maker")]
-[assembly: AssemblyDescription("")]
+[assembly: AssemblyTitle("ORM-Maker")]
+[assembly: AssemblyDescription("ORM Texture Maker")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("orm_maker")]
+[assembly: AssemblyCompany("Tokursky")]
+[assembly: AssemblyProduct("ORM-Maker")]
 [assembly: AssemblyCopyright("Copyright ©  2021")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
