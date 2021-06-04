@@ -161,7 +161,6 @@ namespace orm_maker
                 graphics.Clear(Color.Black);
             //Update final bitmap
             update_bitmap();
-
         }
         private void picturebox_click(EventArgs e, ref PictureBox box, ref Image img, ref Button btn, ref Label lbl, ref bool flag, ref Bitmap map)
         {
