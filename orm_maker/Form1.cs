@@ -1,21 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
+﻿using Microsoft.VisualBasic;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.VisualBasic;
 
-namespace orm_maker
-{
-    public partial class Form1 : Form
-    {
-        public Form1()
-        {
+namespace orm_maker {
+    public partial class Form1 : Form {
+        public Form1() {
             InitializeComponent();
         }
 
@@ -31,9 +22,9 @@ namespace orm_maker
         Bitmap _m_map;
 
         //Delete buttons
-        Button _o_btn = new Button();
-        Button _r_btn = new Button();
-        Button _m_btn = new Button();
+        Button _o_btn;
+        Button _r_btn;
+        Button _m_btn;
 
         //Flag for images
         bool is_o_image_set = false;
@@ -60,34 +51,32 @@ namespace orm_maker
             "Go to Repository ->",
             "About ORM-MAKER"
         };
-        int sz = 1024;
+        int sz = 228;
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
+        private void Form1_Load(object sender, EventArgs e) {
             //Set output image size
-            if (!is_size_set)
-            {
+            if (!is_size_set) {
                 string str = "";
-                 do
-                 {
-                    str = Interaction.InputBox("Enter output file size: \n (256<=size<=16384)");
+                do {
+                    str = Interaction.InputBox("Enter output file size: \n (from 128 to 16384)");
                     if (str.Length == 0)
-                        this.Close();                
-                    else 
-                        if (int.TryParse(str,out sz))
+                        this.Close();
+                    else
+                        if (int.TryParse(str, out sz))
                             sz = int.Parse(str);
-                    } while (!(sz >= 256 && sz <= 16384));
-                
+                } while (!(sz >= 128 && sz <= 16384));
                 is_size_set = true;
+                result = new Bitmap(sz, sz);
             }
 
+            _o_btn = _r_btn = _m_btn = new Button();
+            //Button parameters
+            _o_btn.Size = _r_btn.Size = _m_btn.Size = new Size(80, 40);
+            _o_btn.Location = _r_btn.Location = _m_btn.Location = new Point(33, 52);
             //Click events to buttons
             _o_btn.Click += new EventHandler(pictureBox1_button_Click);
             _r_btn.Click += new EventHandler(pictureBox2_button_Click);
             _m_btn.Click += new EventHandler(pictureBox3_button_Click);
-            //Button parameters
-            _o_btn.Size = _r_btn.Size = _m_btn.Size = new Size(80, 40);
-            _o_btn.Location = _r_btn.Location = _m_btn.Location = new Point(33, 52);
 
             //Allow drop
             pictureBox1.AllowDrop = pictureBox2.AllowDrop = pictureBox3.AllowDrop = true;
@@ -95,30 +84,25 @@ namespace orm_maker
             label1.AllowDrop = label2.AllowDrop = label3.AllowDrop = true;
 
             //Bitmaps init
-            if (!is_o_image_set)
-            {
+            if (!is_o_image_set) {
                 _o_map = new Bitmap(sz, sz);
                 using (var graphics = Graphics.FromImage(_o_map))
                     graphics.Clear(Color.Black);
                 _o_btn.Visible = false;
             }
-            if (!is_r_image_set)
-            {
+            if (!is_r_image_set) {
                 _r_map = new Bitmap(sz, sz);
                 using (var graphics = Graphics.FromImage(_r_map))
                     graphics.Clear(Color.Black);
                 _r_btn.Visible = false;
             }
-            if (!is_m_image_set)
-            {
+            if (!is_m_image_set) {
                 _m_map = new Bitmap(sz, sz);
-                using (var graphics = Graphics.FromImage(_m_map))
-                {
+                using (var graphics = Graphics.FromImage(_m_map)) {
                     graphics.Clear(Color.Black);
                 }
                 _m_btn.Visible = false;
             }
-            result = new Bitmap(sz, sz);
 
             //Progressbar init
             progressBar1.Maximum = sz;
@@ -137,20 +121,16 @@ namespace orm_maker
             goToRepositoryToolStripMenuItem.Text = words[7];
             aboutORMMAKERToolStripMenuItem.Text = words[8];
         }
-        private void drag_enter(DragEventArgs e, Label lbl)
-        {
-            if (e.Data.GetDataPresent(DataFormats.FileDrop))
-            {
+        private void drag_enter(DragEventArgs e, Label lbl) {
+            if (e.Data.GetDataPresent(DataFormats.FileDrop)) {
                 e.Effect = DragDropEffects.Copy;
                 lbl.Text = drop;
             }
         }
-        private void drag_leave(Label lbl)
-        {
+        private void drag_leave(Label lbl) {
             lbl.Text = drag;
         }
-        private void button_click(EventArgs e, ref PictureBox box, ref Image img, ref Button btn, ref Label lbl, ref bool flag, ref Bitmap map)
-        {
+        private void button_click(EventArgs e, ref PictureBox box, ref Image img, ref Button btn, ref Label lbl, ref bool flag, ref Bitmap map) {
             box.Image = pictureBox4.Image = null;
             img = null;
             btn.Visible = false;
@@ -162,17 +142,14 @@ namespace orm_maker
             //Update final bitmap
             update_bitmap();
         }
-        private void picturebox_click(EventArgs e, ref PictureBox box, ref Image img, ref Button btn, ref Label lbl, ref bool flag, ref Bitmap map)
-        {
+        private void picturebox_click(EventArgs e, ref PictureBox box, ref Image img, ref Button btn, ref Label lbl, ref bool flag, ref Bitmap map) {
             OpenFileDialog file = new OpenFileDialog();
-            file.Filter = "Image files (*.JPG, *.PNG)|*.jpg;*.png";
-            if (file.ShowDialog() == DialogResult.OK)
-            {
-                //Controls
+            file.Filter = "Image Files(*.jpg; *.jpeg; *.gif; *.bmp; *.png)|*.jpg; *.jpeg; *.gif; *.bmp; *.png";
+            if (file.ShowDialog() == DialogResult.OK) {
+                //Change controls
                 lbl.Visible = false;
                 btn.Visible = true;
-
-                //Change flag
+                //Change flag is_ _on_set
                 flag = true;
 
                 //Set image
@@ -185,14 +162,14 @@ namespace orm_maker
                 update_bitmap();
             }
         }
-        private void picturebox_dragdrop(DragEventArgs e, ref PictureBox box, ref Image img, ref Button btn, ref Label lbl, ref bool flag, ref Bitmap map)
-        {
+        private void picturebox_dragdrop(DragEventArgs e, ref PictureBox box, ref Image img, ref Button btn, ref Label lbl, ref bool flag, ref Bitmap map) {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
-            if (files.Length == 1)
-            {
+            if (files.Length == 1) {
                 if (files[0].EndsWith(".jpg") || files[0].EndsWith(".JPG") ||
-                    files[0].EndsWith(".png") || files[0].EndsWith(".PNG"))
-                {
+                    files[0].EndsWith(".jpeg") || files[0].EndsWith(".JPEG") ||
+                    files[0].EndsWith(".png") || files[0].EndsWith(".PNG") ||
+                    files[0].EndsWith(".bmp") || files[0].EndsWith(".BMP") ||
+                    files[0].EndsWith(".gif") || files[0].EndsWith(".GIF")) {
                     //Controls
                     lbl.Visible = false;
                     btn.Visible = true;
@@ -206,7 +183,6 @@ namespace orm_maker
                     box.Image = map;
                     btn.Parent = box;
 
-
                     //Update final bitmap
                     update_bitmap();
                 }
@@ -218,28 +194,32 @@ namespace orm_maker
             lbl.Text = drag;
         }
         private void update_bitmap() {
-            if (!(_o_img == null && _r_img == null && _m_img == null))
-            {
+            if (!(_o_img == null && _r_img == null && _m_img == null)) {
                 progressBar1.Visible = true;
-                for (int i = 0; i < sz; i++)
-                {
-                    progressBar1.Value++;
-                    for (int j = 0; j < sz; j++)
-                    {
-                        result.SetPixel(i, j, Color.FromArgb(
-                                       _o_map.GetPixel(i, j).R,
-                                       _r_map.GetPixel(i, j).G,
-                                       _m_map.GetPixel(i, j).B
-                                   ));
+                BmpPixelSnoop map = new BmpPixelSnoop(result);
+                BmpPixelSnoop o = new BmpPixelSnoop(_o_map);
+                BmpPixelSnoop r = new BmpPixelSnoop(_r_map);
+                BmpPixelSnoop m = new BmpPixelSnoop(_m_map);
+                for (int i = 0; i < sz; i++) {
+                    for (int j = 0; j < sz; j++) {
+                        Color newcolor = Color.FromArgb(
+                                       o.GetPixel(i, j).R,
+                                       r.GetPixel(i, j).G,
+                                       m.GetPixel(i, j).B);
+                        map.SetPixel(i, j, newcolor);
                     }
+                    progressBar1.Value++;
                 }
+                pictureBox4.Image = result;
+                map.Dispose();
+                o.Dispose();
+                r.Dispose();
+                m.Dispose();
                 progressBar1.Value = 0;
                 progressBar1.Visible = false;
-                pictureBox4.Image = result;
             }
         }
-        private void englishToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        private void englishToolStripMenuItem_Click(object sender, EventArgs e) {
             englishToolStripMenuItem.Checked = true;
             russianToolStripMenuItem.Checked = false;
             drag = "drag or press";
@@ -259,8 +239,7 @@ namespace orm_maker
             words[8] = "About ORM-MAKER";
             this.OnLoad(e);
         }
-        private void russianToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        private void russianToolStripMenuItem_Click(object sender, EventArgs e) {
             russianToolStripMenuItem.Checked = true;
             englishToolStripMenuItem.Checked = false;
             drag = "перетащи или нажми";
@@ -280,29 +259,24 @@ namespace orm_maker
             words[8] = "Об ORM-MAKER";
             this.OnLoad(e);
         }
-        private void aboutORMMAKERToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        private void aboutORMMAKERToolStripMenuItem_Click(object sender, EventArgs e) {
             about menu = new about();
             menu.flag = englishToolStripMenuItem.Checked;
             menu.ShowDialog();
         }
-        private void goToRepositoryToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            System.Diagnostics.Process.Start("https://github.com/tokursky/ORM-Maker");
+        private void goToRepositoryToolStripMenuItem_Click(object sender, EventArgs e) {
+            System.Diagnostics.Process.Start("https://github.com/tokursky/orm-maker");
         }
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e) {
             this.Close();
         }
-        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        private void saveAsToolStripMenuItem_Click(object sender, EventArgs e) {
             SaveFileDialog file = new SaveFileDialog();
             file.Filter = "Image files (*.JPG, *.PNG)|*.jpg;*.png";
             //result.SetResolution(sz, sz);
-            if (file.ShowDialog() == DialogResult.OK)
-            {
+            if (file.ShowDialog() == DialogResult.OK) {
                 string file_ext = file.FileName.Remove(0, file.FileName.Length - 3);
-                switch(file_ext) {
+                switch (file_ext) {
                     case "jpg":
                         ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
                         EncoderParameters myEncoderParameters = new EncoderParameters(1);
@@ -319,77 +293,59 @@ namespace orm_maker
                 }
             }
         }
-        private ImageCodecInfo GetEncoder(ImageFormat format)
-        {
+        private ImageCodecInfo GetEncoder(ImageFormat format) {
             ImageCodecInfo[] codecs = ImageCodecInfo.GetImageEncoders();
-            foreach (ImageCodecInfo codec in codecs)
-            {
-                if (codec.FormatID == format.Guid)
-                {
+            foreach (ImageCodecInfo codec in codecs) {
+                if (codec.FormatID == format.Guid) {
                     return codec;
                 }
             }
             return null;
         }
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
+        private void pictureBox1_Click(object sender, EventArgs e) {
             picturebox_click(e, ref pictureBox1, ref _o_img, ref _o_btn, ref label1, ref is_o_image_set, ref _o_map);
         }
-        private void pictureBox2_Click(object sender, EventArgs e)
-        {
+        private void pictureBox2_Click(object sender, EventArgs e) {
             picturebox_click(e, ref pictureBox2, ref _r_img, ref _r_btn, ref label2, ref is_r_image_set, ref _r_map);
         }
-        private void pictureBox3_Click(object sender, EventArgs e)
-        {
+        private void pictureBox3_Click(object sender, EventArgs e) {
             picturebox_click(e, ref pictureBox3, ref _m_img, ref _m_btn, ref label3, ref is_m_image_set, ref _m_map);
         }
-        private void pictureBox1_DragDrop(object sender, DragEventArgs e)
-        {
+        private void pictureBox1_DragDrop(object sender, DragEventArgs e) {
             picturebox_dragdrop(e, ref pictureBox1, ref _o_img, ref _o_btn, ref label1, ref is_o_image_set, ref _o_map);
         }
-        private void pictureBox2_DragDrop(object sender, DragEventArgs e)
-        {
+        private void pictureBox2_DragDrop(object sender, DragEventArgs e) {
             picturebox_dragdrop(e, ref pictureBox2, ref _r_img, ref _r_btn, ref label2, ref is_r_image_set, ref _r_map);
         }
-        private void pictureBox3_DragDrop(object sender, DragEventArgs e)
-        {
+        private void pictureBox3_DragDrop(object sender, DragEventArgs e) {
             picturebox_dragdrop(e, ref pictureBox3, ref _m_img, ref _m_btn, ref label3, ref is_m_image_set, ref _m_map);
         }
-        private void pictureBox1_DragEnter(object sender, DragEventArgs e)
-        {
+        private void pictureBox1_DragEnter(object sender, DragEventArgs e) {
             drag_enter(e, label1);
         }
-        private void pictureBox2_DragEnter(object sender, DragEventArgs e)
-        {
+        private void pictureBox2_DragEnter(object sender, DragEventArgs e) {
             drag_enter(e, label2);
         }
-        private void pictureBox3_DragEnter(object sender, DragEventArgs e)
-        {
+        private void pictureBox3_DragEnter(object sender, DragEventArgs e) {
             drag_enter(e, label3);
         }
-        private void pictureBox1_DragLeave(object sender, EventArgs e)
-        {
+        private void pictureBox1_DragLeave(object sender, EventArgs e) {
             drag_leave(label1);
         }
-        private void pictureBox2_DragLeave(object sender, EventArgs e)
-        {
+        private void pictureBox2_DragLeave(object sender, EventArgs e) {
             drag_leave(label2);
         }
-        private void pictureBox3_DragLeave(object sender, EventArgs e)
-        {
+        private void pictureBox3_DragLeave(object sender, EventArgs e) {
             drag_leave(label3);
         }
-        private void pictureBox1_button_Click(object sender, EventArgs e)
-        {
+        private void pictureBox1_button_Click(object sender, EventArgs e) {
             button_click(e, ref pictureBox1, ref _o_img, ref _o_btn, ref label1, ref is_o_image_set, ref _o_map);
         }
-        private void pictureBox2_button_Click(object sender, EventArgs e)
-        {
+        private void pictureBox2_button_Click(object sender, EventArgs e) {
             button_click(e, ref pictureBox2, ref _r_img, ref _r_btn, ref label2, ref is_r_image_set, ref _r_map);
         }
-        private void pictureBox3_button_Click(object sender, EventArgs e)
-        {
+        private void pictureBox3_button_Click(object sender, EventArgs e) {
             button_click(e, ref pictureBox3, ref _m_img, ref _m_btn, ref label3, ref is_m_image_set, ref _m_map);
-        }  
+        }
     }
 }

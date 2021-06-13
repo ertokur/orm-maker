@@ -312,7 +312,7 @@ namespace orm_maker
             this.MaximumSize = new System.Drawing.Size(657, 530);
             this.MinimumSize = new System.Drawing.Size(657, 530);
             this.Name = "Form1";
-            this.Text = "ORM Texture Maker";
+            this.Text = "ORM Texture Maker v1.1";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();

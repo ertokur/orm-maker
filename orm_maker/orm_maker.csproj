@@ -49,6 +49,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup>
     <ManifestCertificateThumbprint>F764FCCF0D27F9A00B15DBFFB1D27D46A44A32F9</ManifestCertificateThumbprint>
@@ -85,6 +86,7 @@
     <Compile Include="about.Designer.cs">
       <DependentUpon>about.cs</DependentUpon>
     </Compile>
+    <Compile Include="BmpPixelSnoop.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
