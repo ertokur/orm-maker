@@ -9,36 +9,18 @@ namespace orm_maker {
         public Form1() {
             InitializeComponent();
         }
-
-        //Image files
-        Image _o_img;
-        Image _r_img;
-        Image _m_img;
-
-        //Bitmaps
+        //Битмапа выходного файла
         Bitmap result;
-        Bitmap _o_map;
-        Bitmap _r_map;
-        Bitmap _m_map;
-
-        //Delete buttons
-        Button _o_btn;
-        Button _r_btn;
-        Button _m_btn;
-
-        //Flag for images
-        bool is_o_image_set = false;
-        bool is_r_image_set = false;
-        bool is_m_image_set = false;
+        //Флаг, проверяющий установлен ли размер выходного файла
         bool is_size_set = false;
-
-        //Language setters
+        //Строки для смены языка
         string drag = "drag or press";
         string drop = "drop";
         string del = "delete";
         string wrn = "Warning!";
         string file_one = "drop only 1 file!";
         string file_format = "wrong file format dropped!";
+        string file_format_select = "wrong file format selected!";
         string[] words =
         {
             "File",
@@ -51,64 +33,36 @@ namespace orm_maker {
             "Go to Repository ->",
             "About ORM-MAKER"
         };
-        int sz = 228;
-
+        int sz = 0;
+        enum Channel {
+            Red,
+            Green,
+            Blue,
+            Erase_Red,
+            Erase_Green,
+            Erase_Blue
+        }
         private void Form1_Load(object sender, EventArgs e) {
-            //Set output image size
+            //Установить размер выходного файла
             if (!is_size_set) {
-                string str = "";
                 do {
-                    str = Interaction.InputBox("Enter output file size: \n (from 128 to 16384)");
-                    if (str.Length == 0)
+                    var str = Interaction.InputBox("Enter output file size: \n (from 128 to 16384)", "", "1024");
+                    if (str.Length == 0) {
                         this.Close();
-                    else
-                        if (int.TryParse(str, out sz))
-                            sz = int.Parse(str);
+                        return;
+                    }
+                    else if (int.TryParse(str, out sz))
+                        sz = int.Parse(str);
                 } while (!(sz >= 128 && sz <= 16384));
                 is_size_set = true;
                 result = new Bitmap(sz, sz);
             }
-
-            _o_btn = _r_btn = _m_btn = new Button();
-            //Button parameters
-            _o_btn.Size = _r_btn.Size = _m_btn.Size = new Size(80, 40);
-            _o_btn.Location = _r_btn.Location = _m_btn.Location = new Point(33, 52);
-            //Click events to buttons
-            _o_btn.Click += new EventHandler(pictureBox1_button_Click);
-            _r_btn.Click += new EventHandler(pictureBox2_button_Click);
-            _m_btn.Click += new EventHandler(pictureBox3_button_Click);
-
-            //Allow drop
             pictureBox1.AllowDrop = pictureBox2.AllowDrop = pictureBox3.AllowDrop = true;
             pictureBox1.SizeMode = pictureBox2.SizeMode = pictureBox3.SizeMode = pictureBox4.SizeMode = PictureBoxSizeMode.StretchImage;
             label1.AllowDrop = label2.AllowDrop = label3.AllowDrop = true;
-
-            //Bitmaps init
-            if (!is_o_image_set) {
-                _o_map = new Bitmap(sz, sz);
-                using (var graphics = Graphics.FromImage(_o_map))
-                    graphics.Clear(Color.Black);
-                _o_btn.Visible = false;
-            }
-            if (!is_r_image_set) {
-                _r_map = new Bitmap(sz, sz);
-                using (var graphics = Graphics.FromImage(_r_map))
-                    graphics.Clear(Color.Black);
-                _r_btn.Visible = false;
-            }
-            if (!is_m_image_set) {
-                _m_map = new Bitmap(sz, sz);
-                using (var graphics = Graphics.FromImage(_m_map)) {
-                    graphics.Clear(Color.Black);
-                }
-                _m_btn.Visible = false;
-            }
-
-            //Progressbar init
             progressBar1.Maximum = sz;
             progressBar1.Visible = false;
-
-            //Language
+            //Язык
             _o_btn.Text = _r_btn.Text = _m_btn.Text = del;
             label1.Text = label2.Text = label3.Text = drag;
             fileToolStripMenuItem.Text = words[0];
@@ -130,94 +84,184 @@ namespace orm_maker {
         private void drag_leave(Label lbl) {
             lbl.Text = drag;
         }
-        private void button_click(EventArgs e, ref PictureBox box, ref Image img, ref Button btn, ref Label lbl, ref bool flag, ref Bitmap map) {
-            box.Image = pictureBox4.Image = null;
-            img = null;
-            btn.Visible = false;
-            lbl.Visible = true;
-            flag = false;
-            map = new Bitmap(sz, sz);
-            using (var graphics = Graphics.FromImage(map))
-                graphics.Clear(Color.Black);
-            //Update final bitmap
-            update_bitmap();
+        private void button_click(EventArgs e, Channel ch) {
+            switch (ch) {
+                case Channel.Erase_Red:
+                    label1.Visible = true;
+                    _o_btn.Visible = false;
+                    pictureBox1.Image = null;
+                    break;
+                case Channel.Erase_Green:
+                    label2.Visible = true;
+                    _r_btn.Visible = false;
+                    pictureBox2.Image = null;
+                    break;
+                case Channel.Erase_Blue:
+                    label3.Visible = true;
+                    _m_btn.Visible = false;
+                    pictureBox3.Image = null;
+                    break;
+                default:
+                    break;
+            }
+            dispose_bitmap(ch);
         }
-        private void picturebox_click(EventArgs e, ref PictureBox box, ref Image img, ref Button btn, ref Label lbl, ref bool flag, ref Bitmap map) {
+        private void picturebox_click(EventArgs e, Channel ch) {
             OpenFileDialog file = new OpenFileDialog();
-            file.Filter = "Image Files(*.jpg; *.jpeg; *.gif; *.bmp; *.png)|*.jpg; *.jpeg; *.gif; *.bmp; *.png";
+            file.Filter = "Image Files(*.jpg; *.jpeg; *.gif; *.bmp; *.png; *.tiff)|*.jpg; *.jpeg; *.gif; *.bmp; *.png; *.tiff";
             if (file.ShowDialog() == DialogResult.OK) {
-                //Change controls
-                lbl.Visible = false;
-                btn.Visible = true;
-                //Change flag is_ _on_set
-                flag = true;
-
-                //Set image
-                img = Image.FromFile(file.FileName);
-                map = new Bitmap(img, sz, sz);
-                box.Image = map;
-                btn.Parent = box;
-
-                //Update final bitmap
-                update_bitmap();
+                Image img = Image.FromFile(file.FileName);
+                Bitmap map = new Bitmap(img, sz, sz);
+                Bitmap thumbnail = new Bitmap(img, 150, 150);
+                img.Dispose();
+                //Установить картинку в picturebox в зависимости от канала
+                switch (ch) {
+                    case Channel.Red:
+                        label1.Visible = false;
+                        _o_btn.Visible = true;
+                        pictureBox1.Image = thumbnail;
+                        break;
+                    case Channel.Green:
+                        label2.Visible = false;
+                        _r_btn.Visible = true;
+                        pictureBox2.Image = thumbnail;
+                        break;
+                    case Channel.Blue:
+                        label3.Visible = false;
+                        _m_btn.Visible = true;
+                        pictureBox3.Image = thumbnail;
+                        break;
+                    default:
+                        break;
+                }
+                //Обновить выходной файл
+                update_bitmap(ref map, ch);
+                //Очистить память
+                map.Dispose();
             }
         }
-        private void picturebox_dragdrop(DragEventArgs e, ref PictureBox box, ref Image img, ref Button btn, ref Label lbl, ref bool flag, ref Bitmap map) {
+        private void picturebox_dragdrop(DragEventArgs e, Channel ch) {
             string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
             if (files.Length == 1) {
-                if (files[0].EndsWith(".jpg") || files[0].EndsWith(".JPG") ||
-                    files[0].EndsWith(".jpeg") || files[0].EndsWith(".JPEG") ||
-                    files[0].EndsWith(".png") || files[0].EndsWith(".PNG") ||
-                    files[0].EndsWith(".bmp") || files[0].EndsWith(".BMP") ||
-                    files[0].EndsWith(".gif") || files[0].EndsWith(".GIF")) {
-                    //Controls
-                    lbl.Visible = false;
-                    btn.Visible = true;
-
-                    //Change flag
-                    flag = true;
-
-                    //Set image
-                    img = Image.FromFile(files[0]);
-                    map = new Bitmap(img, sz, sz);
-                    box.Image = map;
-                    btn.Parent = box;
-
-                    //Update final bitmap
-                    update_bitmap();
+                if (files[0].EndsWith(".jpg") || files[0].EndsWith(".JPG")  ||
+                    files[0].EndsWith(".jpeg")|| files[0].EndsWith(".JPEG") ||
+                    files[0].EndsWith(".png") || files[0].EndsWith(".PNG")  ||
+                    files[0].EndsWith(".bmp") || files[0].EndsWith(".BMP")  ||
+                    files[0].EndsWith(".gif") || files[0].EndsWith(".GIF")  ||
+                    files[0].EndsWith(".tiff")|| files[0].EndsWith(".TIFF")) {
+                    Image img = Image.FromFile(files[0]);
+                    Bitmap map = new Bitmap(img, sz, sz);
+                    Bitmap thumbnail = new Bitmap(img, 150, 150);
+                    img.Dispose();
+                    //Установить картинку в picturebox в зависимости от канала
+                    switch (ch) {
+                        case Channel.Red:
+                            label1.Visible = false;
+                            _o_btn.Visible = true;
+                            pictureBox1.Image = thumbnail;
+                            break;
+                        case Channel.Green:
+                            label2.Visible = false;
+                            _r_btn.Visible = true;
+                            pictureBox2.Image = thumbnail;
+                            break;
+                        case Channel.Blue:
+                            label3.Visible = false;
+                            _m_btn.Visible = true;
+                            pictureBox3.Image = thumbnail;
+                            break;
+                        default:
+                            break;
+                    }
+                    //Обновить выходной файл
+                    update_bitmap(ref map, ch);
+                    //Очистить память
+                    map.Dispose();
                 }
                 else
                     MessageBox.Show(file_format, wrn, MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
             else
                 MessageBox.Show(file_one, wrn, MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            lbl.Text = drag;
-        }
-        private void update_bitmap() {
-            if (!(_o_img == null && _r_img == null && _m_img == null)) {
-                progressBar1.Visible = true;
-                BmpPixelSnoop map = new BmpPixelSnoop(result);
-                BmpPixelSnoop o = new BmpPixelSnoop(_o_map);
-                BmpPixelSnoop r = new BmpPixelSnoop(_r_map);
-                BmpPixelSnoop m = new BmpPixelSnoop(_m_map);
-                for (int i = 0; i < sz; i++) {
-                    for (int j = 0; j < sz; j++) {
-                        Color newcolor = Color.FromArgb(
-                                       o.GetPixel(i, j).R,
-                                       r.GetPixel(i, j).G,
-                                       m.GetPixel(i, j).B);
-                        map.SetPixel(i, j, newcolor);
-                    }
-                    progressBar1.Value++;
-                }
-                pictureBox4.Image = result;
-                map.Dispose();
-                o.Dispose();
-                r.Dispose();
-                m.Dispose();
-                progressBar1.Value = 0;
-                progressBar1.Visible = false;
+            switch (ch) {
+                case Channel.Red:
+                    label1.Text = drag;
+                    break;
+                case Channel.Green:
+                    label2.Text = drag;
+                    break;
+                case Channel.Blue:
+                    label3.Text = drag;
+                    break;
+                default:
+                    break;
             }
+        }
+        private void update_bitmap(ref Bitmap map, Channel ch) {
+            progressBar1.Visible = true;
+            BmpPixelSnoop result_map = new BmpPixelSnoop(result);
+            BmpPixelSnoop pic_map = new BmpPixelSnoop(map);
+            for (int i = 0; i < sz; i++) {
+                for (int j = 0; j < sz; j++) {
+                    Color clr = pic_map.GetPixel(i, j);
+                    int grayScale = (int)((clr.R + clr.G + clr.B) / 3);
+                    Color cur_clr = result_map.GetPixel(i, j);
+                    Color new_clr = cur_clr;
+                    //В зависимости от выбранного канала, записать цвет
+                    switch (ch) {
+                        case Channel.Red:
+                            new_clr = Color.FromArgb(grayScale, cur_clr.G, cur_clr.B);
+                            break;
+                        case Channel.Green:
+                            new_clr = Color.FromArgb(cur_clr.R, grayScale, cur_clr.B);
+                            break;
+                        case Channel.Blue:
+                            new_clr = Color.FromArgb(cur_clr.R, cur_clr.G, grayScale);
+                            break;
+                        default:
+                            break;
+                    }
+                    result_map.SetPixel(i, j, new_clr);
+                }
+                progressBar1.Value++;
+            }
+            //Очистить BmpPixelSnoop
+            result_map.Dispose();
+            pic_map.Dispose();
+            pictureBox4.Image = result;
+            progressBar1.Value = 0;
+            progressBar1.Visible = false;
+        }
+        private void dispose_bitmap(Channel ch) {
+            progressBar1.Visible = true;
+            BmpPixelSnoop result_map = new BmpPixelSnoop(result);
+            for (int i = 0; i < sz; i++) {
+                for (int j = 0; j < sz; j++) {
+                    Color cur_clr = result_map.GetPixel(i, j);
+                    Color new_clr = cur_clr;
+                    //В зависимости от выбранного канала, записать цвет
+                    switch (ch) {
+                        case Channel.Erase_Red:
+                            new_clr = Color.FromArgb(0, cur_clr.G, cur_clr.B);
+                            break;
+                        case Channel.Erase_Green:
+                            new_clr = Color.FromArgb(cur_clr.R, 0, cur_clr.B);
+                            break;
+                        case Channel.Erase_Blue:
+                            new_clr = Color.FromArgb(cur_clr.R, cur_clr.G, 0);
+                            break;
+                        default:
+                            break;
+                    }
+                    result_map.SetPixel(i, j, new_clr);
+                }
+                progressBar1.Value++;
+            }
+            //Очистить BmpPixelSnoop
+            result_map.Dispose();
+            pictureBox4.Image = result;
+            progressBar1.Value = 0;
+            progressBar1.Visible = false;
         }
         private void englishToolStripMenuItem_Click(object sender, EventArgs e) {
             englishToolStripMenuItem.Checked = true;
@@ -228,6 +272,7 @@ namespace orm_maker {
             wrn = "Warning!";
             file_one = "drop only 1 file!";
             file_format = "wrong file format dropped!";
+            file_format_select = "wrong file format selected!";
             words[0] = "File";
             words[1] = "Save as...";
             words[2] = "Exit";
@@ -248,6 +293,7 @@ namespace orm_maker {
             wrn = "Внимание!";
             file_one = "перетащи только 1 файл!";
             file_format = "неправильный формат файла!";
+            file_format_select = "неправильный формат файла!";
             words[0] = "Файл";
             words[1] = "Сохранить как...";
             words[2] = "Выход";
@@ -272,12 +318,15 @@ namespace orm_maker {
         }
         private void saveAsToolStripMenuItem_Click(object sender, EventArgs e) {
             SaveFileDialog file = new SaveFileDialog();
-            file.Filter = "Image files (*.JPG, *.PNG)|*.jpg;*.png";
-            //result.SetResolution(sz, sz);
+            file.Filter = "Image Files(*.jpg; *.jpeg; *.gif; *.bmp; *.png; *.tiff)|*.jpg; *.jpeg; *.gif; *.bmp; *.png; *.tiff";
+            file.OverwritePrompt = true;
+            file.RestoreDirectory = true;
+            file.AddExtension = true;
             if (file.ShowDialog() == DialogResult.OK) {
-                string file_ext = file.FileName.Remove(0, file.FileName.Length - 3);
-                switch (file_ext) {
-                    case "jpg":
+                string ext = System.IO.Path.GetExtension(file.FileName);
+                switch (ext) {
+                    case ".jpeg":
+                    case ".jpg":
                         ImageCodecInfo jpgEncoder = GetEncoder(ImageFormat.Jpeg);
                         EncoderParameters myEncoderParameters = new EncoderParameters(1);
                         System.Drawing.Imaging.Encoder myEncoder = System.Drawing.Imaging.Encoder.Quality;
@@ -285,10 +334,20 @@ namespace orm_maker {
                         myEncoderParameters.Param[0] = myEncoderParameter;
                         result.Save(file.FileName, jpgEncoder, myEncoderParameters);
                         break;
-                    case "png":
-                        result.Save(file.FileName, System.Drawing.Imaging.ImageFormat.Png);
+                    case ".png":
+                        result.Save(file.FileName, ImageFormat.Png);
+                        break;
+                    case ".bmp":
+                        result.Save(file.FileName, ImageFormat.Bmp);
+                        break;
+                    case ".gif":
+                        result.Save(file.FileName, ImageFormat.Gif);
+                        break;
+                    case ".tiff":
+                        result.Save(file.FileName, ImageFormat.Tiff);
                         break;
                     default:
+                        MessageBox.Show(file_format_select, wrn, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                         break;
                 }
             }
@@ -303,22 +362,22 @@ namespace orm_maker {
             return null;
         }
         private void pictureBox1_Click(object sender, EventArgs e) {
-            picturebox_click(e, ref pictureBox1, ref _o_img, ref _o_btn, ref label1, ref is_o_image_set, ref _o_map);
+            picturebox_click(e, Channel.Red);
         }
         private void pictureBox2_Click(object sender, EventArgs e) {
-            picturebox_click(e, ref pictureBox2, ref _r_img, ref _r_btn, ref label2, ref is_r_image_set, ref _r_map);
+            picturebox_click(e, Channel.Green);
         }
         private void pictureBox3_Click(object sender, EventArgs e) {
-            picturebox_click(e, ref pictureBox3, ref _m_img, ref _m_btn, ref label3, ref is_m_image_set, ref _m_map);
+            picturebox_click(e, Channel.Blue);
         }
         private void pictureBox1_DragDrop(object sender, DragEventArgs e) {
-            picturebox_dragdrop(e, ref pictureBox1, ref _o_img, ref _o_btn, ref label1, ref is_o_image_set, ref _o_map);
+            picturebox_dragdrop(e, Channel.Red);
         }
         private void pictureBox2_DragDrop(object sender, DragEventArgs e) {
-            picturebox_dragdrop(e, ref pictureBox2, ref _r_img, ref _r_btn, ref label2, ref is_r_image_set, ref _r_map);
+            picturebox_dragdrop(e, Channel.Green);
         }
         private void pictureBox3_DragDrop(object sender, DragEventArgs e) {
-            picturebox_dragdrop(e, ref pictureBox3, ref _m_img, ref _m_btn, ref label3, ref is_m_image_set, ref _m_map);
+            picturebox_dragdrop(e, Channel.Blue);
         }
         private void pictureBox1_DragEnter(object sender, DragEventArgs e) {
             drag_enter(e, label1);
@@ -339,13 +398,13 @@ namespace orm_maker {
             drag_leave(label3);
         }
         private void pictureBox1_button_Click(object sender, EventArgs e) {
-            button_click(e, ref pictureBox1, ref _o_img, ref _o_btn, ref label1, ref is_o_image_set, ref _o_map);
+            button_click(e, Channel.Erase_Red);
         }
         private void pictureBox2_button_Click(object sender, EventArgs e) {
-            button_click(e, ref pictureBox2, ref _r_img, ref _r_btn, ref label2, ref is_r_image_set, ref _r_map);
+            button_click(e, Channel.Erase_Green);
         }
         private void pictureBox3_button_Click(object sender, EventArgs e) {
-            button_click(e, ref pictureBox3, ref _m_img, ref _m_btn, ref label3, ref is_m_image_set, ref _m_map);
+            button_click(e, Channel.Erase_Blue);
         }
     }
 }

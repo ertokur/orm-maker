@@ -53,6 +53,9 @@ namespace orm_maker
             this.label3 = new System.Windows.Forms.Label();
             this.pictureBox4 = new System.Windows.Forms.PictureBox();
             this.progressBar1 = new System.Windows.Forms.ProgressBar();
+            this._o_btn = new System.Windows.Forms.Button();
+            this._r_btn = new System.Windows.Forms.Button();
+            this._m_btn = new System.Windows.Forms.Button();
             this.menuStrip1.SuspendLayout();
             this.contextMenuStrip3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -272,7 +275,7 @@ namespace orm_maker
             // 
             // pictureBox4
             // 
-            this.pictureBox4.BackColor = System.Drawing.SystemColors.ActiveBorder;
+            this.pictureBox4.BackColor = System.Drawing.SystemColors.Desktop;
             this.pictureBox4.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
             this.pictureBox4.Location = new System.Drawing.Point(168, 27);
             this.pictureBox4.Name = "pictureBox4";
@@ -287,6 +290,42 @@ namespace orm_maker
             this.progressBar1.Size = new System.Drawing.Size(279, 29);
             this.progressBar1.TabIndex = 6;
             // 
+            // _o_btn
+            // 
+            this._o_btn.Cursor = System.Windows.Forms.Cursors.Hand;
+            this._o_btn.Location = new System.Drawing.Point(37, 83);
+            this._o_btn.Name = "_o_btn";
+            this._o_btn.Size = new System.Drawing.Size(101, 39);
+            this._o_btn.TabIndex = 7;
+            this._o_btn.Text = "button1";
+            this._o_btn.UseVisualStyleBackColor = true;
+            this._o_btn.Visible = false;
+            this._o_btn.Click += new System.EventHandler(this.pictureBox1_button_Click);
+            // 
+            // _r_btn
+            // 
+            this._r_btn.Cursor = System.Windows.Forms.Cursors.Hand;
+            this._r_btn.Location = new System.Drawing.Point(37, 239);
+            this._r_btn.Name = "_r_btn";
+            this._r_btn.Size = new System.Drawing.Size(101, 39);
+            this._r_btn.TabIndex = 7;
+            this._r_btn.Text = "button1";
+            this._r_btn.UseVisualStyleBackColor = true;
+            this._r_btn.Visible = false;
+            this._r_btn.Click += new System.EventHandler(this.pictureBox2_button_Click);
+            // 
+            // _m_btn
+            // 
+            this._m_btn.Cursor = System.Windows.Forms.Cursors.Hand;
+            this._m_btn.Location = new System.Drawing.Point(37, 395);
+            this._m_btn.Name = "_m_btn";
+            this._m_btn.Size = new System.Drawing.Size(101, 39);
+            this._m_btn.TabIndex = 7;
+            this._m_btn.Text = "button1";
+            this._m_btn.UseVisualStyleBackColor = true;
+            this._m_btn.Visible = false;
+            this._m_btn.Click += new System.EventHandler(this.pictureBox3_button_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -294,6 +333,9 @@ namespace orm_maker
             this.BackColor = System.Drawing.SystemColors.Control;
             this.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Center;
             this.ClientSize = new System.Drawing.Size(641, 495);
+            this.Controls.Add(this._m_btn);
+            this.Controls.Add(this._r_btn);
+            this.Controls.Add(this._o_btn);
             this.Controls.Add(this.progressBar1);
             this.Controls.Add(this.pictureBox4);
             this.Controls.Add(this.label3);
@@ -349,6 +391,9 @@ namespace orm_maker
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.PictureBox pictureBox4;
         private System.Windows.Forms.ProgressBar progressBar1;
+        private System.Windows.Forms.Button _o_btn;
+        private System.Windows.Forms.Button _r_btn;
+        private System.Windows.Forms.Button _m_btn;
     }
 }
 
